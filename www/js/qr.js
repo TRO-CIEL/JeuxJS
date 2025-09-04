@@ -39,20 +39,34 @@ function ConnexionAuServeurWebsocket() {
         };
 
         ws.onmessage = function (evt) {
-            console.log('Message recu du serveur : ' + evt.data);
-            // Si le message ressemble a une question (contient '=' ou se termine par '?'),
-            // on l'affiche dans le champ question, sinon c'est un feedback/resultat.
-            var data = String(evt.data || '');
-            var t = data.trim();
-            var estQuestion = (t.indexOf('=') !== -1) || /\?$/.test(t) || t.indexOf('Convertir en base 10:') === 0;
-            if (estQuestion) {
-                document.getElementById('questionTexte').value = data;
-                // effacer un ancien resultat pour clarte
-                var res = document.getElementById('resultatTexte');
-                if (res) res.value = '';
-            } else {
-                var res = document.getElementById('resultatTexte');
-                if (res) res.value = data;
+            console.log('Message recu du serveur : ', evt.data);
+            var raw = evt.data;
+            var shown = false;
+            // Essayer JSON {question: '...'}
+            if (typeof raw === 'string' && raw.length && raw.charAt(0) === '{') {
+                try {
+                    var obj = JSON.parse(raw);
+                    if (obj && typeof obj.question === 'string') {
+                        document.getElementById('questionTexte').value = obj.question;
+                        var res1 = document.getElementById('resultatTexte');
+                        if (res1) res1.value = '';
+                        shown = true;
+                    }
+                } catch (e) { /* ignore, fallback */ }
+            }
+            if (!shown) {
+                // Fallback heuristique texte
+                var data = String(raw || '');
+                var t = data.trim();
+                var estQuestion = (t.indexOf('=') !== -1) || /\?$/.test(t) || t.indexOf('Convertir en base 10:') === 0;
+                if (estQuestion) {
+                    document.getElementById('questionTexte').value = data;
+                    var res2 = document.getElementById('resultatTexte');
+                    if (res2) res2.value = '';
+                } else {
+                    var res3 = document.getElementById('resultatTexte');
+                    if (res3) res3.value = data;
+                }
             }
         };
 

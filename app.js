@@ -106,14 +106,8 @@ class CQr {
             this.question = qb.question;
             this.bonneReponse = qb.bonneReponse;
         }
-        // Diffusion aux clients du canal /qr uniquement
-        if (this.broadcaster) {
-            this.broadcaster.clients.forEach(function each(client) {
-                if (client.readyState == WebSocket.OPEN) {
-                    client.send(this.question);
-                }
-            }.bind(this));
-        }
+        // Diffuser via la methode centralisee
+        this.EnvoyerResultatDiff();
     }
 
     NouvelleQuestionBinaire() {
@@ -149,11 +143,27 @@ class CQr {
         console.log('Reponse client nom:%s valeur:%s (brut:%s)', nom, valeur, brut);
 
         if (!Number.isNaN(valeur) && valeur === this.bonneReponse) {
-            try { wsClient.send('Bonne reponse'); } catch (e) {}
+            this.question = 'Bonne reponse de ' + (nom || 'inconnu');
+            this.EnvoyerResultatDiff();
             setTimeout(function () { this.NouvelleQuestion(); }.bind(this), 3000);
         } else {
-            var msg = 'Mauvaise reponse' + (nom ? ' (' + nom + ')' : '');
-            try { wsClient.send(msg); } catch (e) {}
+            this.question = 'Mauvaise reponse de ' + (nom || 'inconnu');
+            this.EnvoyerResultatDiff();
+        }
+    }
+
+    EnvoyerResultatDiff() {
+        var messagePourLesClients = {
+            question: this.question
+            // joueurs: [], reponse: ... (a ajouter plus tard)
+        };
+        var payload = JSON.stringify(messagePourLesClients);
+        if (this.broadcaster) {
+            this.broadcaster.clients.forEach(function each(client) {
+                if (client.readyState == WebSocket.OPEN) {
+                    try { client.send(payload); } catch (e) {}
+                }
+            });
         }
     }
 }
