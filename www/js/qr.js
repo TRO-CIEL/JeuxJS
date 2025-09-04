@@ -79,9 +79,17 @@ function ControleIHM() {
 function BPValider() {
     var reponseInput = document.getElementById('reponseTexte');
     var reponse = reponseInput.value;
+    var nom = (document.getElementById('nom') && document.getElementById('nom').value) || '';
     if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(reponse);
-        console.log('Reponse envoyee : ' + reponse);
+        try {
+            var payload = { nom: nom, reponse: reponse };
+            ws.send(JSON.stringify(payload));
+            console.log('Payload JSON envoye : ', payload);
+        } catch (e) {
+            // Fallback improbable
+            ws.send(reponse);
+            console.log('Reponse envoyee (fallback texte) : ' + reponse);
+        }
         // Option: vider le champ reponse apres envoi
         reponseInput.value = '';
     } else {
