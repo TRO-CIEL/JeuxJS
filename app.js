@@ -113,8 +113,10 @@ exp.ws('/qr', function (ws, req) {
         if (!Number.isNaN(valeur) && valeur === bonneReponse) {
             // Confirmer au client qui a repondu
             try { ws.send('Bonne reponse'); } catch (e) {}
-            // Nouvelle question pour tout le monde
-            NouvelleQuestion();
+            // Attendre 3 secondes puis poser une nouvelle question a tout le monde
+            setTimeout(function(){
+                NouvelleQuestion();
+            }, 3000);
         } else {
             // Indiquer que la reponse est incorrecte
             try { ws.send('Mauvaise reponse'); } catch (e) {}
