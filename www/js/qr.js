@@ -39,9 +39,20 @@ function ConnexionAuServeurWebsocket() {
         };
 
         ws.onmessage = function (evt) {
-            // Pour l'instant, on suppose que le serveur envoie la question en clair
             console.log('Message recu du serveur : ' + evt.data);
-            document.getElementById('questionTexte').value = evt.data;
+            // Si le message ressemble a une question (contient '=' ou se termine par '?'),
+            // on l'affiche dans le champ question, sinon c'est un feedback/resultat.
+            var data = String(evt.data || '');
+            var estQuestion = (data.indexOf('=') !== -1) || /\?$/.test(data.trim());
+            if (estQuestion) {
+                document.getElementById('questionTexte').value = data;
+                // effacer un ancien resultat pour clarte
+                var res = document.getElementById('resultatTexte');
+                if (res) res.value = '';
+            } else {
+                var res = document.getElementById('resultatTexte');
+                if (res) res.value = data;
+            }
         };
 
         ws.onclose = function (event) {
@@ -65,10 +76,13 @@ function ControleIHM() {
 }
 
 function BPValider() {
-    var reponse = document.getElementById('reponseTexte').value;
+    var reponseInput = document.getElementById('reponseTexte');
+    var reponse = reponseInput.value;
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(reponse);
         console.log('Reponse envoyee : ' + reponse);
+        // Option: vider le champ reponse apres envoi
+        reponseInput.value = '';
     } else {
         console.warn('WebSocket pas encore prete (etat = ' + (ws ? ws.readyState : 'inconnue') + ')');
     }

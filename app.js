@@ -80,3 +80,61 @@ exp.use(function (err, req, res, next) {
 exp.listen(port, '172.17.50.138', function () {
     console.log('Serveur en ecoute sur http://172.17.50.138:' + port);
 });
+
+/* *************** WebSocket Q/R sur /qr ********************* */
+// Variables globales pour Q/R
+var question = '?';
+var bonneReponse = 0;
+
+// Broadcaster pour /qr
+var aWssQr = expressWs.getWss('/qr');
+
+// Connexion des clients a la WebSocket /qr et evenements associes
+exp.ws('/qr', function (ws, req) {
+    console.log('Connection WebSocket %s sur le port %s',
+        req.connection.remoteAddress, req.connection.remotePort);
+
+    // Envoie une premiere question a la connexion d'un client
+    NouvelleQuestion();
+
+    ws.on('message', TraiterReponse);
+
+    ws.on('close', function (reasonCode, description) {
+        console.log('Deconnexion WebSocket %s sur le port %s',
+            req.connection.remoteAddress, req.connection.remotePort);
+    });
+
+    function TraiterReponse(message) {
+        var brut = (message !== undefined && message !== null) ? String(message) : '';
+        var nettoye = brut.trim();
+        var valeur = parseInt(nettoye, 10);
+        console.log('De %s %s, message :%s (nettoye:%s, valeur:%s)', req.connection.remoteAddress,
+            req.connection.remotePort, brut, nettoye, valeur);
+        if (!Number.isNaN(valeur) && valeur === bonneReponse) {
+            // Confirmer au client qui a repondu
+            try { ws.send('Bonne reponse'); } catch (e) {}
+            // Nouvelle question pour tout le monde
+            NouvelleQuestion();
+        } else {
+            // Indiquer que la reponse est incorrecte
+            try { ws.send('Mauvaise reponse'); } catch (e) {}
+        }
+    }
+
+    function NouvelleQuestion() {
+        var x = GetRandomInt(11);
+        var y = GetRandomInt(11);
+        question = x + '*' + y + ' = ?';
+        bonneReponse = x * y;
+        // Diffuser la question a tous les clients connectes sur /qr
+        aWssQr.clients.forEach(function each(client) {
+            if (client.readyState == WebSocket.OPEN) {
+                client.send(question);
+            }
+        });
+    }
+
+    function GetRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+});
