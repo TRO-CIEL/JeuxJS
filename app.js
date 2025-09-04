@@ -124,16 +124,33 @@ exp.ws('/qr', function (ws, req) {
     }
 
     function NouvelleQuestion() {
-        var x = GetRandomInt(11);
-        var y = GetRandomInt(11);
-        question = x + '*' + y + ' = ?';
-        bonneReponse = x * y;
+        // Choisir aleatoirement entre multiplication et conversion binaire
+        if (Math.random() < 0.5) {
+            var x = GetRandomInt(11);
+            var y = GetRandomInt(11);
+            question = x + '*' + y + ' = ?';
+            bonneReponse = x * y;
+        } else {
+            var qb = NouvelleQuestionBinaire();
+            question = qb.question;
+            bonneReponse = qb.bonneReponse;
+        }
         // Diffuser la question a tous les clients connectes sur /qr
         aWssQr.clients.forEach(function each(client) {
             if (client.readyState == WebSocket.OPEN) {
                 client.send(question);
             }
         });
+    }
+
+    function NouvelleQuestionBinaire() {
+        var n = Math.floor(Math.random() * 256); // 0..255
+        var binaire = '';
+        for (var i = 7; i >= 0; i--) {
+            var bit = (n >> i) & 1;
+            binaire += bit ? '1' : '0';
+        }
+        return { question: 'Convertir en base 10: ' + binaire, bonneReponse: n };
     }
 
     function GetRandomInt(max) {

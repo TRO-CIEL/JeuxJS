@@ -43,7 +43,8 @@ function ConnexionAuServeurWebsocket() {
             // Si le message ressemble a une question (contient '=' ou se termine par '?'),
             // on l'affiche dans le champ question, sinon c'est un feedback/resultat.
             var data = String(evt.data || '');
-            var estQuestion = (data.indexOf('=') !== -1) || /\?$/.test(data.trim());
+            var t = data.trim();
+            var estQuestion = (t.indexOf('=') !== -1) || /\?$/.test(t) || t.indexOf('Convertir en base 10:') === 0;
             if (estQuestion) {
                 document.getElementById('questionTexte').value = data;
                 // effacer un ancien resultat pour clarte
