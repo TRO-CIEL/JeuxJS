@@ -98,7 +98,8 @@ class CQr {
     EnvoyerResultatDiff() {
         var joueursSimple = new Array();
         this.joueurs.forEach(function each(joueur) {
-            joueursSimple.push({ nom: joueur.nom, score: joueur.score });
+            var connected = !!(joueur.ws && joueur.ws.readyState === WebSocket.OPEN);
+            joueursSimple.push({ nom: joueur.nom, score: joueur.score, ws: connected });
         });
         var messagePourLesClients = {
             joueurs: joueursSimple,
@@ -123,7 +124,8 @@ class CQr {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
         var joueursSimple = new Array();
         this.joueurs.forEach(function each(joueur) {
-            joueursSimple.push({ nom: joueur.nom, score: joueur.score });
+            var connected = !!(joueur.ws && joueur.ws.readyState === WebSocket.OPEN);
+            joueursSimple.push({ nom: joueur.nom, score: joueur.score, ws: connected });
         });
         var messagePourLeClient = {
             joueurs: joueursSimple,
