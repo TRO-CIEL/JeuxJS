@@ -42,7 +42,7 @@ function ConnexionAuServeurWebsocket() {
             console.log('Message recu du serveur : ', evt.data);
             var raw = evt.data;
             var shown = false;
-            // Essayer JSON {question: '...'}
+            // Essayer JSON {question: '...', joueurs: [...]}
             if (typeof raw === 'string' && raw.length && raw.charAt(0) === '{') {
                 try {
                     var obj = JSON.parse(raw);
@@ -51,6 +51,12 @@ function ConnexionAuServeurWebsocket() {
                         var res1 = document.getElementById('resultatTexte');
                         if (res1) res1.value = '';
                         shown = true;
+                    }
+                    if (obj && Array.isArray(obj.joueurs)) {
+                        var zone = document.getElementById('resultats');
+                        if (zone) {
+                            zone.textContent = JSON.stringify(obj.joueurs);
+                        }
                     }
                 } catch (e) { /* ignore, fallback */ }
             }
