@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP JeuxJS - TextChat</title>
+</head>
+<body>
+    <header>
+        <h1>TP JeuxJS - TextChat (WebSocket)</h1>
+    </header>
+
+    <div>
+        <label>Message à envoyer : </label>
+        <input type="text" id="messageEnvoi">
+        <input type="button" id="Envoyer" value="Envoyer">
+    </div>
+
+    <section>
+        <label>Message reçu : </label>
+        <input type="text" id="messageRecu" readonly>
+    </section>
+
+    <footer>
+        <small>Serveur echo/broadcast via WebSocket</small>
+    </footer>
+
+    <script type="text/javascript" src="js/echo.js"></script>
+</body>
+</html>

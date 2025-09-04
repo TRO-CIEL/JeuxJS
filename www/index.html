@@ -2,25 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=textchat.html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TP JeuxJS</title>
+    <title>Redirection vers textchat.html</title>
+    <script>
+        // Fallback JS si la redirection meta est ignoree
+        window.location.replace('textchat.html');
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=textchat.html">
+    </noscript>
 </head>
 <body>
-    <header>
-        <h1>TP JeuxJS - WebSocket Echo</h1>
-    </header>
-    <div>
-        <label>Message à envoyer : </label>
-        <input type="text" id="messageEnvoi">
-        <input type="button" id="Envoyer" value="Envoyer">
-    </div>
-    <section>
-        <label>Message reçu : </label>
-        <input type="text" id="messageRecu" readonly>
-    </section>
-    <footer>
-        <small>Serveur echo via WebSocket</small>
-    </footer>
-    <script type="text/javascript" src="js/echo.js"></script>
+    <p>Redirection vers <a href="textchat.html">textchat.html</a>...</p>
 </body>
 </html>

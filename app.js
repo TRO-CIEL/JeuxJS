@@ -13,11 +13,10 @@ var port = 80;
 // Servir les fichiers statiques du dossier www/
 exp.use(express.static(__dirname + '/www'));
 
-// Réponse pour la racine "/"
-// Page d'accueil
+// Reponse pour la racine "/" -> sert la page de chat texte
 exp.get('/', function (req, res) {
     console.log('Reponse envoyee a un client');
-    res.sendFile(__dirname + '/www/index.html');
+    res.sendFile(__dirname + '/www/textchat.html');
 });
 
 // Endpoint simple pour tests de sante
@@ -27,16 +26,44 @@ exp.get('/health', function (req, res) {
 
 /* *************** serveur WebSocket express ********************* */
 const expressWs = require('express-ws')(exp);
+// Outil de broadcast sur le endpoint /echo
+var aWss = expressWs.getWss('/echo');
+var WebSocket = require('ws');
+aWss.broadcast = function broadcast(data) {
+    console.log('Broadcast aux clients navigateur : %s', data);
+    aWss.clients.forEach(function each(client) {
+        if (client.readyState == WebSocket.OPEN) {
+            client.send(data, function ack(error) {
+                if (error) {
+                    console.log('ERREUR websocket broadcast : %s', error.toString());
+                }
+            });
+        }
+    });
+};
 
 // Connexion des clients a la WebSocket /echo et evenements associes
 exp.ws('/echo', function (ws, req) {
     console.log('Connection WebSocket %s sur le port %s',
         req.connection.remoteAddress, req.connection.remotePort);
+
     ws.on('message', function (message) {
         console.log('De %s %s, message :%s', req.connection.remoteAddress,
             req.connection.remotePort, message);
-        ws.send(message);
+
+        // Prefixe avec IP et port du client pour diffusion
+        try {
+            var ip = (ws._socket && ws._socket._peername && ws._socket._peername.address) || req.connection.remoteAddress;
+            var prt = (ws._socket && ws._socket._peername && ws._socket._peername.port) || req.connection.remotePort;
+            message = ip + prt + ' : ' + message;
+        } catch (e) {
+            // si indisponible, garder le message tel quel
+        }
+
+        // Envoi a tous les clients connectes
+        aWss.broadcast(message);
     });
+
     ws.on('close', function (reasonCode, description) {
         console.log('Deconnexion WebSocket %s sur le port %s',
             req.connection.remoteAddress, req.connection.remotePort);

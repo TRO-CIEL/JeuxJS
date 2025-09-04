@@ -1,7 +1,7 @@
 console.log('echo.js charge');
 
-// IP fixe du serveur WebSocket demandée
-var ipServeur = '172.17.50.138';
+// Adresse IP/nom d'hote du serveur = celui qui a servi la page
+var ipServeur = location.hostname;
 // Choix du schéma selon la page (si vous ouvrez en https, utilisez wss)
 var wsScheme = (location.protocol === 'https:' ? 'wss://' : 'ws://');
 var wsBase = wsScheme + ipServeur + ':80';
